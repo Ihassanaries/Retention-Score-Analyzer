@@ -3,3 +3,7 @@ pandas==2.2.3
 numpy==2.2.3
 plotly==5.15.0
 openai==1.11.0
+yt_dlp
+beautifulsoup4
+requests
+google-api-python-client
