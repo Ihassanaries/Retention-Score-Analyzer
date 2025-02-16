@@ -129,11 +129,14 @@ if video_url1:
         Based on these numbers, **what are 3 simple strategies I can use to improve retention and keep viewers engaged longer?**
         """
 
-        response = openai.ChatCompletion.create(
-            model="gpt-4",
-            messages=[{"role": "system", "content": "You are an expert YouTube consultant."},
-                      {"role": "user", "content": prompt}]
-        )
+        client = openai.OpenAI(api_key="YOUR_OPENAI_API_KEY")  # Add your API key here
+
+response = client.chat.completions.create(
+    model="gpt-4",
+    messages=[{"role": "system", "content": "You are an expert YouTube consultant."},
+              {"role": "user", "content": prompt}]
+)
+
 
         st.write("### 📌 AI Suggestions to Improve")
         st.write(response["choices"][0]["message"]["content"])
