@@ -10,7 +10,7 @@ import requests
 import googleapiclient.discovery
 
 # YouTube API Key (Replace with your own)
-YOUTUBE_API_KEY = "a453e8a05dcdc9f0e0b06674cf51f196a91f0112"
+YOUTUBE_API_KEY = "9136468e3417c01638407e1ac1ee5ae421e8ae63"
 
 # Function to extract video ID from URL
 def extract_video_id(url):
