@@ -67,17 +67,14 @@ def extract_retention_data(video_url):
         return None, views, likes
 
 # Streamlit UI
-st.title("🎬 Retention Score Analyzer (YouTube Link Version)")
-st.write("Paste YouTube video links to analyze and compare retention data automatically.")
+st.title("📊 YouTube Retention Score Analyzer")
+st.write("🔍 Paste a YouTube link below to analyze audience engagement and get **easy-to-understand insights**.")
 
 # Sidebar Inputs
-st.sidebar.header("Enter YouTube Video Links")
+st.sidebar.header("Enter YouTube Video Link")
 video_url1 = st.sidebar.text_input("📌 Enter Your Video URL")
-video_url2 = st.sidebar.text_input("🎯 Enter Competitor's Video URL (Optional)")
 
-# Single Video Analysis
-if video_url1 and not video_url2:
-    st.write("## 📊 Your Video Analysis")
+if video_url1:
     df1, views1, likes1 = extract_retention_data(video_url1)
 
     if df1 is not None:
@@ -85,56 +82,58 @@ if video_url1 and not video_url2:
         early_dropoff = df1[df1["timestamp"] < 30]["retention_percentage"].mean()
         final_retention = df1[df1["timestamp"] > (df1["timestamp"].max() * 0.9)]["retention_percentage"].mean()
 
-        st.metric("📊 Average Retention Score", f"{avg_retention:.2f}%")
-        st.metric("⚠️ Early Drop-Off Rate", f"{early_dropoff:.2f}%")
-        st.metric("🎬 Final Retention Strength", f"{final_retention:.2f}%")
-        st.metric("👀 Views", views1)
-        st.metric("👍 Likes", likes1)
+        # **💡 Beginner-Friendly Explanations**
+        st.subheader("📊 Your Video Analysis (With Easy Explanation)")
 
-        # Retention Graph
-        fig = px.line(df1, x="timestamp", y="retention_percentage", title="Your Video's Audience Retention")
+        # **📌 Retention Score**
+        st.write(f"**📈 Average Retention Score: {avg_retention:.2f}%**")
+        st.write("➡️ This tells how many viewers, on average, **stay watching your video** until the end. Higher is better!")
+
+        # **⚠️ Early Drop-Off Rate**
+        st.write(f"**⚠️ Early Drop-Off Rate: {early_dropoff:.2f}%**")
+        if early_dropoff > 40:
+            st.warning("🚨 Many viewers **leave within the first 30 seconds**! Consider making your intro more engaging.")
+        elif early_dropoff > 20:
+            st.info("🔹 Some viewers **drop off early**. You can improve this with a strong hook!")
+        else:
+            st.success("✅ Your intro is **keeping viewers engaged**. Keep it up!")
+
+        # **🎬 Final Retention Strength**
+        st.write(f"**📌 Final Retention Strength: {final_retention:.2f}%**")
+        if final_retention < 10:
+            st.warning("🚨 Most viewers **don’t finish your video**. Try making your content more engaging throughout.")
+        elif final_retention < 30:
+            st.info("🔹 Some people watch till the end, but there’s room for improvement.")
+        else:
+            st.success("✅ Great! Many viewers are **watching until the end**.")
+
+        # **👀 Views & 👍 Likes**
+        st.write(f"👀 **Total Views:** {views1}")
+        st.write(f"👍 **Total Likes:** {likes1}")
+
+        # **📊 Retention Graph**
+        st.subheader("📊 Your Video's Audience Retention")
+        fig = px.line(df1, x="timestamp", y="retention_percentage", title="Viewer Retention Over Time")
         st.plotly_chart(fig)
 
-# Compare Two Videos
-elif video_url1 and video_url2:
-    st.write("## 🔍 Comparing Your Video vs. Competitor's Video")
-
-    df1, views1, likes1 = extract_retention_data(video_url1)
-    df2, views2, likes2 = extract_retention_data(video_url2)
-
-    if df1 is not None and df2 is not None:
-        avg_retention_1 = np.mean(df1["retention_percentage"])
-        avg_retention_2 = np.mean(df2["retention_percentage"])
-
-        col1, col2 = st.columns(2)
-        with col1:
-            st.metric("📊 Your Video Retention Score", f"{avg_retention_1:.2f}%")
-            st.metric("👀 Views", views1)
-            st.metric("👍 Likes", likes1)
-        with col2:
-            st.metric("📊 Competitor's Retention Score", f"{avg_retention_2:.2f}%")
-            st.metric("👀 Views", views2)
-            st.metric("👍 Likes", likes2)
-
-        # Retention Graph Comparison
-        fig = px.line(title="🔍 Retention Comparison: Your Video vs. Competitor")
-        fig.add_scatter(x=df1["timestamp"], y=df1["retention_percentage"], mode='lines', name="Your Video", line=dict(color="blue"))
-        fig.add_scatter(x=df2["timestamp"], y=df2["retention_percentage"], mode='lines', name="Competitor's Video", line=dict(color="red"))
-        st.plotly_chart(fig)
-
-        # AI Suggestions
+        # **💡 AI-Powered Suggestions**
+        st.subheader("🤖 Smart AI Suggestions to Improve Retention")
         prompt = f"""
-        Compare retention data for two videos:
-        - Your Video: {avg_retention_1:.2f}%
-        - Competitor's Video: {avg_retention_2:.2f}%
+        My video has:
+        - **Average Retention Score**: {avg_retention:.2f}%
+        - **Early Drop-Off**: {early_dropoff:.2f}%
+        - **Final Retention**: {final_retention:.2f}%
+        - **Total Views**: {views1}
+        - **Total Likes**: {likes1}
 
-        Provide an in-depth analysis of what the competitor is doing better and what improvements should be made to increase retention in your video.
+        Based on these numbers, **what are 3 simple strategies I can use to improve retention and keep viewers engaged longer?**
         """
+
         response = openai.ChatCompletion.create(
             model="gpt-4",
-            messages=[{"role": "system", "content": "You are a YouTube retention expert."},
+            messages=[{"role": "system", "content": "You are an expert YouTube consultant."},
                       {"role": "user", "content": prompt}]
         )
 
-        st.write("### 🤖 AI-Powered Retention Improvement Suggestions")
+        st.write("### 📌 AI Suggestions to Improve")
         st.write(response["choices"][0]["message"]["content"])
