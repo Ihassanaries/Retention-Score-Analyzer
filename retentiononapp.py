@@ -9,8 +9,11 @@ from bs4 import BeautifulSoup
 import requests
 import googleapiclient.discovery
 
-# YouTube API Key (Replace with your own)
+# Your YouTube API Key (hardcoded)
 YOUTUBE_API_KEY = "AIzaSyCID6TRLIk4krNLu5BpUkDXpTfhbQaZScs"
+
+# Your OpenAI API Key (Add here if you want)
+OPENAI_API_KEY = "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"
 
 # Function to extract video ID from URL
 def extract_video_id(url):
@@ -118,6 +121,9 @@ if video_url1:
 
         # **💡 AI-Powered Suggestions**
         st.subheader("🤖 Smart AI Suggestions to Improve Retention")
+
+        client = openai.OpenAI(api_key=OPENAI_API_KEY)
+
         prompt = f"""
         My video has:
         - **Average Retention Score**: {avg_retention:.2f}%
@@ -129,14 +135,13 @@ if video_url1:
         Based on these numbers, **what are 3 simple strategies I can use to improve retention and keep viewers engaged longer?**
         """
 
-        client = openai.OpenAI(api_key="YOUR_OPENAI_API_KEY")  # Add your API key here
+        # Updated OpenAI API Call
+        response = client.chat.completions.create(
+            model="gpt-4",
+            messages=[{"role": "system", "content": "You are an expert YouTube consultant."},
+                      {"role": "user", "content": prompt}]
+        )
 
-response = client.chat.completions.create(
-    model="gpt-4",
-    messages=[{"role": "system", "content": "You are an expert YouTube consultant."},
-              {"role": "user", "content": prompt}]
-)
-
-
+        # ✅ **Fix: Correct Indentation**
         st.write("### 📌 AI Suggestions to Improve")
-        st.write(response["choices"][0]["message"]["content"])
+        st.write(response.choices[0].message.content)
